@@ -62,9 +62,15 @@ spec:
           image: {{ .Values.connect.api.imageRepository }}:{{ tpl .Values.connect.version . }}
           imagePullPolicy: {{ .Values.connect.imagePullPolicy }}
           securityContext:
-            runAsUser: 999
-            runAsGroup: 999
+            {{- if .Values.connect.securityContext.runAsUser }}
+            runAsUser: {{ .Values.connect.securityContext.runAsUser }}
+            {{- end }}
+            {{- if .Values.connect.securityContext.runAsGroup }}
+            runAsGroup: {{ .Values.connect.securityContext.runAsGroup }}
+            {{- end }}
+            {{- if .Values.connect.securityContext.allowPrivilegeEscalation }}
             allowPrivilegeEscalation: false
+            {{- end }}
           resources:
             {{- toYaml .Values.connect.api.resources | nindent 12 }}
           env:
@@ -124,9 +130,15 @@ spec:
           image: {{ .Values.connect.sync.imageRepository }}:{{ tpl .Values.connect.version . }}
           imagePullPolicy: {{ .Values.connect.imagePullPolicy }}
           securityContext:
-            runAsUser: 999
-            runAsGroup: 999
+            {{- if .Values.connect.securityContext.runAsUser }}
+            runAsUser: {{ .Values.connect.securityContext.runAsUser }}
+            {{- end }}
+            {{- if .Values.connect.securityContext.runAsGroup }}
+            runAsGroup: {{ .Values.connect.securityContext.runAsGroup }}
+            {{- end }}
+            {{- if .Values.connect.securityContext.allowPrivilegeEscalation }}
             allowPrivilegeEscalation: false
+            {{- end }}
           resources:
             {{- toYaml .Values.connect.sync.resources | nindent 12 }}
           env:
