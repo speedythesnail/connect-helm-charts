@@ -10,6 +10,9 @@ connect:
   # Denotes whether the 1Password Connect server will be deployed
   create: true
 
+  # Set default null value
+  securityContext: {}
+
   # The number of replicas to run the 1Password Connect deployment
   replicas: 1
 
