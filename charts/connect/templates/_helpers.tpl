@@ -161,3 +161,7 @@ Sets environment variables when profiler is enabled
 {{- define "onepassword.home.directory" -}}
 /home/opuser
 {{- end -}}
+
+{{- define "onepassword.credentialJson.path" -}}
+{{ include "onepassword.home.directory" . }}/.op
+{{- end -}}
