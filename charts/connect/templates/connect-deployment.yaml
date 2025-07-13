@@ -90,8 +90,6 @@ spec:
 
               mkdir -pv "{{ include "onepassword.home.directory" . }}/.op/data"
               ls -la "{{ include "onepassword.home.directory" . }}/.op"
-              chmod -R g+rw "{{ include "onepassword.home.directory" . }}/.op"
-              chgrp -R "${GROUP_GUID}" "{{ include "onepassword.home.directory" . }}/.op"
           # securityContext:
           {{- if .Values.volumePermissions.resources }}
           resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
@@ -99,7 +97,7 @@ spec:
           resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - mountPath: {{ include "onepassword.home.directory" . }}/.op/data
+            - mountPath: {{ include "onepassword.home.directory" . }}/.op
               name: {{ include "onepassword.volumeName" . }}
         {{- end }}      
       containers:
