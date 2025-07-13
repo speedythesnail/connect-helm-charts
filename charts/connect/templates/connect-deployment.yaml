@@ -97,7 +97,7 @@ spec:
           resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - mountPath: {{ include "onepassword.home.directory" . }}
+            - mountPath: /home
               name: {{ include "onepassword.volumeName" . }}
         {{- end }}      
       containers:
