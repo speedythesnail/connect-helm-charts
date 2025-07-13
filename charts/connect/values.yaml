@@ -1,3 +1,34 @@
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.defaultStorageClass Global default StorageClass for Persistent Volume(s)
+## @param global.storageClass DEPRECATED: use global.defaultStorageClass instead
+global:
+  defaultStorageClass: ""
+  storageClass: ""
+  ## Security parameters
+  ##
+  security:
+    ## @param global.security.allowInsecureImages Allows skipping image verification
+    allowInsecureImages: false
+  ## Compatibility adaptations for Kubernetes platforms
+  ##
+  compatibility:
+    ## Compatibility adaptations for Openshift
+    ##
+    openshift:
+      ## @param global.compatibility.openshift.adaptSecurityContext 
+      ## Adapt the securityContext sections of the deployment to make them compatible 
+      ## with Openshift restricted-v2 SCC: 
+      ## remove runAsUser, runAsGroup and fsGroup and let the platform 
+      ## use their allowed default IDs. 
+      ##
+      ## Possible values: 
+      ##   auto (apply if the detected running cluster is Openshift), 
+      ##   force (perform the adaptation always), 
+      ##   disabled (do not perform adaptation)
+      ##
+      adaptSecurityContext: force
+
 # Note: values.yaml files don't support templating out of the box, so that means
 # that every value "{{ .Between.Curly.Braces }}" in this file needs to be
 # explicitly interpolated on the template side by using the `tpl` function.
@@ -149,7 +180,7 @@ connect:
     readiness: true
 
   # priorityClassName to apply to the Connect API deployment resource.
-  priorityClassName: ''
+  priorityClassName: ""
 
   # Additional annotations to be added to the Connect API deployment resource.
   annotations: {}
@@ -166,17 +197,6 @@ connect:
   # List of tolerations to be added to the Connect API pods.
   tolerations: []
 
-  # 1Password Connect volume shared between 1Password Connect Containers
-  dataVolume:
-    # The name of the shared volume used between 1Password Connect Containers
-    name: shared-data
-    # The type of the shared volume used between
-    # 1Password Connect Containers
-    type: emptyDir
-    # Desribes the fields and values for configuration of
-    # shared volume for 1Password Connect
-    values: {}
-
   # Determines if HTTPS Port if setup for the 1Password Connect
   # Services for 1Password Connect API and Sync
   tls:
@@ -190,9 +210,11 @@ connect:
   # In order to expose the service, use the route section below
   ingress:
     enabled: false
-    labels: {}
+    labels:
+      {}
       # traffic: external
-    annotations: {}
+    annotations:
+      {}
       # |
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
@@ -322,7 +344,7 @@ operator:
   podLabels: {}
 
   # priorityClassName to apply to the Operator pods.
-  priorityClassName: ''
+  priorityClassName: ""
 
   # List of tolerations to be added to the Operator pods.
   tolerations: []
@@ -403,3 +425,95 @@ operator:
 acceptanceTests:
   enabled: false
   fixtures: {}
+
+## Configure Pods Security Context
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+## @param podSecurityContext.enabled Enabled 1password pods' Security Context
+## @param podSecurityContext.fsGroupChangePolicy Set filesystem group change policy
+## @param podSecurityContext.sysctls Set kernel settings using the sysctl interface
+## @param podSecurityContext.supplementalGroups Set filesystem extra groups
+## @param podSecurityContext.fsGroup Set 1password pod's Security Context fsGroup
+##
+podSecurityContext:
+  enabled: true
+  fsGroupChangePolicy: Always
+  sysctls: []
+  supplementalGroups: []
+  fsGroup: 1001
+
+## Configure Container Security Context (only main container)
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+## @param containerSecurityContext.enabled Enabled containers' Security Context
+## @param containerSecurityContext.seLinuxOptions [object,nullable] Set SELinux options in container
+## @param containerSecurityContext.runAsUser Set containers' Security Context runAsUser
+## @param containerSecurityContext.runAsGroup Set containers' Security Context runAsGroup
+## @param containerSecurityContext.runAsNonRoot Set container's Security Context runAsNonRoot
+## @param containerSecurityContext.privileged Set container's Security Context privileged
+## @param containerSecurityContext.readOnlyRootFilesystem Set container's Security Context readOnlyRootFilesystem
+## @param containerSecurityContext.allowPrivilegeEscalation Set container's Security Context allowPrivilegeEscalation
+## @param containerSecurityContext.capabilities.drop List of capabilities to be dropped
+## @param containerSecurityContext.seccompProfile.type Set container's Security Context seccomp profile
+##
+containerSecurityContext:
+  enabled: true
+  seLinuxOptions: {}
+  runAsUser: 1001
+  runAsGroup: 1001
+  runAsNonRoot: true
+  privileged: false
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+  seccompProfile:
+    type: "RuntimeDefault"
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using PVC
+  ##
+  enabled: true
+  ## @param persistence.storageClass PVC Storage Class for Connect volume
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.accessModes PVC Access Mode for Connect volume
+  ## Requires persistence.enabled: true
+  ## If defined, PVC must be created manually before volume will be bound
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size PVC Storage Request for Connect volume
+  ##
+  size: 1Gi
+  ## @param persistence.dataSource Custom PVC data source
+  ##
+  dataSource: {}
+  ## @param persistence.existingClaim A manually managed Persistent Volume Claim
+  ## Requires persistence.enabled: true
+  ## If defined, PVC must be created manually before volume will be bound
+  ##
+  existingClaim: ""
+  ## @param persistence.hostPath If defined, the Connect-data volume will mount to the specified hostPath.
+  ## Requires persistence.enabled: true
+  ## Requires persistence.existingClaim: nil|false
+  ## Default: nil.
+  ##
+  hostPath: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.selector Selector to match an existing Persistent Volume for Connect data PVC
+  ## If set, the PVC can't have a PV dynamically provisioned for it
+  ## E.g.
+  ## selector:
+  ##   matchLabels:
+  ##     app: my-app
+  ##
+  selector: {}

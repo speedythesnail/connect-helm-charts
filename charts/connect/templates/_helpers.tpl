@@ -14,6 +14,20 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Return  the proper Storage Class
+*/}}
+{{- define "onepassword.storageClass" -}}
+{{- include "common.storage.class" (dict "persistence" .Values.persistence "global" .Values.global) -}}
+{{- end -}}
+
+{{/*
+Name of the data volume for 1password
+*/}}
+{{- define "onepassword.volumeName" -}}
+{{- include "common.names.fullname" . }}
+{{- end -}}
+
+{{/*
 Common labels
 */}}
 {{- define "onepassword-connect.labels" -}}

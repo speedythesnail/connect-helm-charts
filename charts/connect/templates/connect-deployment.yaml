@@ -45,8 +45,13 @@ spec:
       {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-        - name: {{ .Values.connect.dataVolume.name }}
-          {{ .Values.connect.dataVolume.type }}: {{- toYaml .Values.connect.dataVolume.values | nindent 12 }}
+        - name: {{ include "onepassword.volumeName" . }}
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (print (include "common.names.fullname" .)) }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
         - name: credentials
           secret:
             secretName: {{ .Values.connect.credentialsName }}
@@ -61,16 +66,9 @@ spec:
         - name: {{ .Values.connect.api.name }}
           image: {{ .Values.connect.api.imageRepository }}:{{ tpl .Values.connect.version . }}
           imagePullPolicy: {{ .Values.connect.imagePullPolicy }}
-          securityContext:
-            {{- if .Values.connect.securityContext.runAsUser }}
-            runAsUser: {{ .Values.connect.securityContext.runAsUser }}
-            {{- end }}
-            {{- if .Values.connect.securityContext.runAsGroup }}
-            runAsGroup: {{ .Values.connect.securityContext.runAsGroup }}
-            {{- end }}
-            {{- if .Values.connect.securityContext.allowPrivilegeEscalation }}
-            allowPrivilegeEscalation: false
-            {{- end }}
+          {{- if .Values.podSecurityContext.enabled }}
+          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.podSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
           resources:
             {{- toYaml .Values.connect.api.resources | nindent 12 }}
           env:
@@ -121,7 +119,7 @@ spec:
           {{ end }}
           volumeMounts:
             - mountPath: /home/opuser/.op/data
-              name: {{ .Values.connect.dataVolume.name }}
+              name: {{ include "onepassword.volumeName" . }}
             {{- if .Values.connect.tls.enabled }}
             - name: tls-cert
               mountPath: /home/opuser/.op/certs
@@ -129,16 +127,9 @@ spec:
         - name: connect-sync
           image: {{ .Values.connect.sync.imageRepository }}:{{ tpl .Values.connect.version . }}
           imagePullPolicy: {{ .Values.connect.imagePullPolicy }}
-          securityContext:
-            {{- if .Values.connect.securityContext.runAsUser }}
-            runAsUser: {{ .Values.connect.securityContext.runAsUser }}
-            {{- end }}
-            {{- if .Values.connect.securityContext.runAsGroup }}
-            runAsGroup: {{ .Values.connect.securityContext.runAsGroup }}
-            {{- end }}
-            {{- if .Values.connect.securityContext.allowPrivilegeEscalation }}
-            allowPrivilegeEscalation: false
-            {{- end }}
+          {{- if .Values.podSecurityContext.enabled }}
+          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.podSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
           resources:
             {{- toYaml .Values.connect.sync.resources | nindent 12 }}
           env:
@@ -175,13 +166,13 @@ spec:
           {{ end }}
           volumeMounts:
             - mountPath: /home/opuser/.op/data
-              name: {{ .Values.connect.dataVolume.name }}
+              name: {{ include "onepassword.volumeName" . }}
         {{- if .Values.connect.profiler.enabled }}
         - name: profiler-data
           image: alpine
           command: [ 'sleep', 'infinity' ]
           volumeMounts:
-            - name: {{ .Values.connect.dataVolume.name }}
+            - name: {{ include "onepassword.volumeName" . }}
               mountPath: /data
               subPath: profiler
         {{- end }}
