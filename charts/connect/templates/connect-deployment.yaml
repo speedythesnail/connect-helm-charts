@@ -91,6 +91,7 @@ spec:
               mkdir -pv "{{ include "onepassword.home.directory" . }}/.op/data"
               ls -la "{{ include "onepassword.home.directory" . }}/.op"
               chown -R "${OWNER_UID}:${GROUP_GUID}" "{{ include "onepassword.home.directory" . }}"
+              chmod 700 "{{ include "onepassword.home.directory" . }}/.op"
           # securityContext:
           {{- if .Values.volumePermissions.resources }}
           resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
