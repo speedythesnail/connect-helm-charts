@@ -92,6 +92,9 @@ spec:
               ls -la "{{ include "onepassword.home.directory" . }}/.op"
               chown -R "${OWNER_UID}:${GROUP_GUID}" "{{ include "onepassword.home.directory" . }}"
               chmod 700 "{{ include "onepassword.home.directory" . }}/.op"
+              chmod 700 "{{ include "onepassword.home.directory" . }}/.op/data"
+              chmod 700 "{{ include "onepassword.home.directory" . }}/.op/data/files"
+
           # securityContext:
           {{- if .Values.volumePermissions.resources }}
           resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
