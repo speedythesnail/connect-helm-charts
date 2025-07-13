@@ -50,9 +50,6 @@ spec:
         - name: {{ .Values.connect.applicationName }}
           image: {{ .Values.operator.imageRepository }}:{{ .Values.operator.version | default "latest" }}
           imagePullPolicy: {{ .Values.connect.imagePullPolicy }}
-          {{- if .Values.podSecurityContext.enabled }}
-          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.podSecurityContext "context" $) | nindent 12 }}
-          {{- end }}
           command: [ "/manager" ]
           args: [ --zap-log-level={{ .Values.operator.logLevel }}]
           env:
@@ -96,4 +93,7 @@ spec:
         - name: {{ . | quote }}
       {{- end }}
       {{- end }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.podSecurityContext "context" $) | nindent 12 }}
+      {{- end }}      
 {{- end }}
