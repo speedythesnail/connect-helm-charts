@@ -97,6 +97,8 @@ spec:
           resources:
             {{- toYaml .Values.connect.api.resources | nindent 12 }}
           env:
+            - name: HOME
+              value: {{ include "onepassword.home.directory" . }}          
             - name: OP_SESSION
               valueFrom:
                 secretKeyRef:
@@ -159,7 +161,7 @@ spec:
             {{- toYaml .Values.connect.sync.resources | nindent 12 }}
           env:
             - name: HOME
-              value: /home/opuser
+              value: {{ include "onepassword.home.directory" . }}
             - name: OP_HTTP_PORT
               value: "{{ .Values.connect.sync.httpPort }}"
             - name: OP_SESSION
