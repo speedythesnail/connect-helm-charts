@@ -112,51 +112,6 @@ spec:
       securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.podSecurityContext "context" $) | nindent 12 }}
       {{- end }}           
       containers:
-        - name: debugger
-          image: busybox
-          command: ["/bin/sh", "-c", "sleep 3600"]
-          env:
-            - name: HOME
-              value: {{ include "onepassword.home.directory" . }}          
-            - name: OP_SESSION
-              value: {{ include "onepassword.credentialJson.path" . }}/1password-credentials.json
-            - name: OP_BUS_PORT
-              value: "11220"
-            - name: OP_BUS_PEERS
-              value: localhost:11221
-            {{- if .Values.connect.tls.enabled }}
-            - name: OP_TLS_CERT_FILE
-              value: /mnt/secrets/certs/tls.crt
-            - name: OP_TLS_KEY_FILE
-              value: /mnt/secrets/certs/tls.key
-            - name: OP_HTTPS_PORT
-              value: "{{ .Values.connect.api.httpsPort }}"
-            {{- else }}
-            - name: OP_HTTP_PORT
-              value: "{{ .Values.connect.api.httpPort }}"
-            {{- end }}
-            - name: OP_LOG_LEVEL
-              value: "{{ .Values.connect.api.logLevel }}"
-            {{- include "onepassword-connect.profilerConfig" . | indent 12 -}}
-            {{- range .Values.connect.customEnvVars }}
-            - name: {{ .name }}
-              value: {{ .value }}
-            {{- end }}
-            - name: OP_CONNECT_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.operator.token.name }}
-                  key: {{ .Values.operator.token.key }}            
-          volumeMounts:
-            - mountPath:  /home
-              name: {{ include "onepassword.volumeName" . }}
-            {{- if .Values.connect.tls.enabled }}
-            - name: tls-cert
-              mountPath: /mnt/certs
-            {{- end }}
-            - name: {{ .Values.connect.credentialsName }}
-              mountPath: {{ include "onepassword.credentialJson.path" . }}
-              readOnly: true            
         - name: {{ .Values.connect.api.name }}
           image: {{ .Values.connect.api.imageRepository }}:{{ tpl .Values.connect.version . }}
           imagePullPolicy: {{ .Values.connect.imagePullPolicy }}
