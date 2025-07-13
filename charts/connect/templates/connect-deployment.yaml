@@ -56,8 +56,8 @@ spec:
           secret:
             secretName: {{ .Values.connect.credentialsName }}
             items:
-              key: json
-              path: 1password-credentials.json
+              - key: json
+                path: 1password-credentials.json
             defaultMode: 0400
         {{- if .Values.connect.tls.enabled }}
         - name: tls-cert
