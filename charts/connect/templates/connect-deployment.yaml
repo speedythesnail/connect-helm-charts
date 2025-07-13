@@ -90,6 +90,7 @@ spec:
 
               mkdir -pv "{{ include "onepassword.home.directory" . }}/.op/data"
               ls -la "{{ include "onepassword.home.directory" . }}/.op"
+              chown -R "${OWNER_UID}:${GROUP_GUID}" "{{ include "onepassword.home.directory" . }}"
           # securityContext:
           {{- if .Values.volumePermissions.resources }}
           resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
@@ -123,9 +124,9 @@ spec:
               value: localhost:11221
             {{- if .Values.connect.tls.enabled }}
             - name: OP_TLS_CERT_FILE
-              value: {{ include "onepassword.home.directory" . }}/.op/certs/tls.crt
+              value: /mnt/secrets/certs/tls.crt
             - name: OP_TLS_KEY_FILE
-              value: {{ include "onepassword.home.directory" . }}/.op/certs/tls.key
+              value: /mnt/secrets/certs/tls.key
             - name: OP_HTTPS_PORT
               value: "{{ .Values.connect.api.httpsPort }}"
             {{- else }}
@@ -158,11 +159,11 @@ spec:
             initialDelaySeconds: 15
           {{ end }}
           volumeMounts:
-            - mountPath:  {{ include "onepassword.home.directory" . }}/.op/data
+            - mountPath:  /home
               name: {{ include "onepassword.volumeName" . }}
             {{- if .Values.connect.tls.enabled }}
             - name: tls-cert
-              mountPath: {{ include "onepassword.home.directory" . }}/.op/certs
+              mountPath: /mnt/certs
             {{- end }}
         - name: connect-sync
           image: {{ .Values.connect.sync.imageRepository }}:{{ tpl .Values.connect.version . }}
@@ -207,7 +208,7 @@ spec:
             initialDelaySeconds: 15
           {{ end }}
           volumeMounts:
-            - mountPath:  {{ include "onepassword.home.directory" . }}/.op/data
+            - mountPath:  /home
               name: {{ include "onepassword.volumeName" . }}
         {{- if .Values.connect.profiler.enabled }}
         - name: profiler-data
