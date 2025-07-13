@@ -85,7 +85,8 @@ spec:
               echo "Will set permissions to: ${OWNER_UID}:${GROUP_GUID}"
               
               mkdir -p "{{ include "onepassword.home.directory" . }}/.op/data"
-              chown -R "${OWNER_UID}:${GROUP_GUID}" "{{ include "onepassword.home.directory" . }}"
+              ls -la ""{{ include "onepassword.home.directory" . }}"
+              # chown -R "${OWNER_UID}:${GROUP_GUID}" "{{ include "onepassword.home.directory" . }}"
           # securityContext:
           {{- if .Values.volumePermissions.resources }}
           resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
