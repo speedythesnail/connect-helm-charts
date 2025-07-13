@@ -74,7 +74,7 @@ spec:
             - sh
             - -c
             - |
-              mkdir -p "/home/opuser/.op/data"
+              mkdir -p "{{ include "onepassword.home.directory" . }}/.op/data"
               chown -R "{{ .Values.containerSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }}" "/home/opuser/.op/data"
           securityContext:
             runAsUser: 0
@@ -84,7 +84,7 @@ spec:
           resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - mountPath: /home/opuser/.op/data
+            - mountPath: {{ include "onepassword.home.directory" . }}/.op/data
               name: {{ include "onepassword.volumeName" . }}
         {{- end }}      
       containers:
@@ -108,9 +108,9 @@ spec:
               value: localhost:11221
             {{- if .Values.connect.tls.enabled }}
             - name: OP_TLS_CERT_FILE
-              value: /home/opuser/.op/certs/tls.crt
+              value: {{ include "onepassword.home.directory" . }}/.op/certs/tls.crt
             - name: OP_TLS_KEY_FILE
-              value: /home/opuser/.op/certs/tls.key
+              value: {{ include "onepassword.home.directory" . }}/.op/certs/tls.key
             - name: OP_HTTPS_PORT
               value: "{{ .Values.connect.api.httpsPort }}"
             {{- else }}
@@ -143,11 +143,11 @@ spec:
             initialDelaySeconds: 15
           {{ end }}
           volumeMounts:
-            - mountPath: /home/opuser/.op/data
+            - mountPath:  {{ include "onepassword.home.directory" . }}/.op/data
               name: {{ include "onepassword.volumeName" . }}
             {{- if .Values.connect.tls.enabled }}
             - name: tls-cert
-              mountPath: /home/opuser/.op/certs
+              mountPath: {{ include "onepassword.home.directory" . }}/.op/certs
             {{- end }}
         - name: connect-sync
           image: {{ .Values.connect.sync.imageRepository }}:{{ tpl .Values.connect.version . }}
@@ -158,6 +158,8 @@ spec:
           resources:
             {{- toYaml .Values.connect.sync.resources | nindent 12 }}
           env:
+            - name: HOME
+              value: /home/opuser
             - name: OP_HTTP_PORT
               value: "{{ .Values.connect.sync.httpPort }}"
             - name: OP_SESSION
@@ -190,7 +192,7 @@ spec:
             initialDelaySeconds: 15
           {{ end }}
           volumeMounts:
-            - mountPath: /home/opuser/.op/data
+            - mountPath:  {{ include "onepassword.home.directory" . }}/.op/data
               name: {{ include "onepassword.volumeName" . }}
         {{- if .Values.connect.profiler.enabled }}
         - name: profiler-data

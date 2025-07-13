@@ -156,3 +156,8 @@ Sets environment variables when profiler is enabled
   value: "{{ .Values.connect.profiler.keepLast }}"
   {{- end -}}
 {{- end -}}
+
+
+{{- define "onepassword.home.directory" -}}
+/home/opuser
+{{- end -}}
