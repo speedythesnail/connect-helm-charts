@@ -99,7 +99,6 @@ spec:
               chmod 700 "{{ include "onepassword.home.directory" . }}/.op/data"
               chmod 700 "{{ include "onepassword.home.directory" . }}/.op/data/files"
 
-          # securityContext:
           {{- if .Values.volumePermissions.resources }}
           resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
           {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
@@ -108,14 +107,14 @@ spec:
           volumeMounts:
             - mountPath: /home
               name: {{ include "onepassword.volumeName" . }}
-        {{- end }}      
+        {{- end }}   
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.podSecurityContext "context" $) | nindent 12 }}
+      {{- end }}           
       containers:
         - name: {{ .Values.connect.api.name }}
           image: {{ .Values.connect.api.imageRepository }}:{{ tpl .Values.connect.version . }}
           imagePullPolicy: {{ .Values.connect.imagePullPolicy }}
-          {{- if .Values.podSecurityContext.enabled }}
-          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.podSecurityContext "context" $) | nindent 12 }}
-          {{- end }}
           resources:
             {{- toYaml .Values.connect.api.resources | nindent 12 }}
           env:
@@ -176,9 +175,6 @@ spec:
         - name: connect-sync
           image: {{ .Values.connect.sync.imageRepository }}:{{ tpl .Values.connect.version . }}
           imagePullPolicy: {{ .Values.connect.imagePullPolicy }}
-          {{- if .Values.podSecurityContext.enabled }}
-          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.podSecurityContext "context" $) | nindent 12 }}
-          {{- end }}
           resources:
             {{- toYaml .Values.connect.sync.resources | nindent 12 }}
           env:
