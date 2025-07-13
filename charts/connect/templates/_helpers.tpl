@@ -14,6 +14,14 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Return the proper image name (for the init container volume-permissions image)
+*/}}
+{{- define "onepassword.volumePermissions.image" -}}
+{{- include "common.images.image" ( dict "imageRoot" .Values.volumePermissions.image "global" .Values.global ) -}}
+{{- end -}}
+
+
+{{/*
 Return  the proper Storage Class
 */}}
 {{- define "onepassword.storageClass" -}}
