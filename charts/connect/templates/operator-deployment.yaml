@@ -81,7 +81,7 @@ spec:
                   name: {{ .Values.operator.token.name }}
                   key: {{ .Values.operator.token.key }}
             {{- end }}
-            {{- range .Values.operator.customEnvVars}}
+            {{- range .Values.operator.customEnvVars }}
             - name: {{ .name }}
               value: {{ .value }}
             {{- end }}
